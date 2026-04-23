@@ -36,6 +36,37 @@ def load_model(path: str) -> YOLO:
     return YOLO(path)
 
 
+def get_ice_servers():
+    """Configura servidores ICE para WebRTC.
+
+    Si hay secrets de TURN configuradas en Streamlit Cloud, las usa (necesario
+    para atravesar NAT en despliegues públicos). Si no, cae a STUN público
+    (suficiente para desarrollo local).
+    """
+    stun_only = [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]},
+    ]
+    try:
+        username = st.secrets["TURN_USERNAME"]
+        credential = st.secrets["TURN_CREDENTIAL"]
+        turn_urls = st.secrets.get(
+            "TURN_URLS",
+            [
+                "turn:openrelay.metered.ca:80",
+                "turn:openrelay.metered.ca:443",
+                "turn:openrelay.metered.ca:443?transport=tcp",
+            ],
+        )
+        if isinstance(turn_urls, str):
+            turn_urls = [turn_urls]
+        return stun_only + [
+            {"urls": turn_urls, "username": username, "credential": credential}
+        ]
+    except (KeyError, FileNotFoundError, AttributeError):
+        return stun_only
+
+
 def detections_to_dataframe(result, class_names) -> pd.DataFrame:
     boxes = result.boxes
     if boxes is None or len(boxes) == 0:
@@ -154,13 +185,15 @@ with tab_live:
         "Activa la cámara para ver la detección en tiempo real. "
         "Ajusta la confianza y el IoU desde la barra lateral mientras el stream esté activo."
     )
+    st.caption(
+        "ℹ️ Si el stream no conecta en el despliegue público, probablemente falta un "
+        "servidor TURN. Funciona siempre al correr local. Ver README para configurar TURN."
+    )
 
     ctx = webrtc_streamer(
         key="ppe-live",
         video_processor_factory=YOLOVideoProcessor,
-        rtc_configuration=RTCConfiguration(
-            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-        ),
+        rtc_configuration=RTCConfiguration({"iceServers": get_ice_servers()}),
         media_stream_constraints={"video": True, "audio": False},
         async_processing=True,
     )
