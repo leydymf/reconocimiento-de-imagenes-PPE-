@@ -11,7 +11,6 @@ Modos disponibles:
 from pathlib import Path
 
 import av
-import cv2
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -99,10 +98,10 @@ with tab_img:
     uploaded = st.file_uploader("Sube una imagen", type=["jpg", "jpeg", "png", "bmp", "webp"])
     if uploaded is not None:
         pil_img = Image.open(uploaded).convert("RGB")
-        img_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+        img_bgr = np.ascontiguousarray(np.array(pil_img)[:, :, ::-1])
 
         annotated_bgr, df = run_detection(model, img_bgr, conf_thr, iou_thr)
-        annotated_rgb = cv2.cvtColor(annotated_bgr, cv2.COLOR_BGR2RGB)
+        annotated_rgb = annotated_bgr[:, :, ::-1]
 
         col1, col2 = st.columns(2)
         with col1:
@@ -125,10 +124,10 @@ with tab_snap:
     snap = st.camera_input("Toma una foto con tu cámara")
     if snap is not None:
         pil_img = Image.open(snap).convert("RGB")
-        img_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+        img_bgr = np.ascontiguousarray(np.array(pil_img)[:, :, ::-1])
 
         annotated_bgr, df = run_detection(model, img_bgr, conf_thr, iou_thr)
-        annotated_rgb = cv2.cvtColor(annotated_bgr, cv2.COLOR_BGR2RGB)
+        annotated_rgb = annotated_bgr[:, :, ::-1]
 
         st.subheader(f"Detecciones ({len(df)})")
         st.image(annotated_rgb, use_container_width=True)
