@@ -30,6 +30,8 @@ La app tiene 3 pestañas:
 
 En la barra lateral se ajustan los umbrales de **confianza** e **IoU** en vivo.
 
+> **Nota sobre la webcam en vivo:** en el despliegue público requiere un servidor TURN (la comunicación WebRTC no atraviesa NAT solo con STUN). En ejecución **local** funciona sin configuración adicional. Para la demostración, correrlo en local es la forma más simple de mostrar este modo.
+
 ## Re-entrenar el modelo
 
 El cuaderno en [`notebooks/cuaderno_entrenamiento_ppe.ipynb`](notebooks/cuaderno_entrenamiento_ppe.ipynb) contiene el pipeline completo para entrenar en Google Colab:
