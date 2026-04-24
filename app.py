@@ -202,3 +202,12 @@ with tab_live:
         ctx.video_processor.model = model
         ctx.video_processor.conf = conf_thr
         ctx.video_processor.iou = iou_thr
+
+
+st.divider()
+st.markdown(
+    "<div style='text-align: center; color: #888; padding: 10px 0; font-size: 0.9em;'>"
+    "Autora: <b>Leydy Macareo</b> — UNAB 2026"
+    "</div>",
+    unsafe_allow_html=True,
+)
